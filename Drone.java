@@ -12,6 +12,9 @@ import java.io.*;
 import java.net.InetAddress;
 import java.net.URL;
 
+import java.net.NetworkInterface;
+import java.util.Enumeration;
+
 
 public class Drone {
 
@@ -44,7 +47,7 @@ public class Drone {
    }
   
    public boolean ping() {
-
+    System.out.println("Pinged!");
     return true;
    }
 
@@ -68,7 +71,7 @@ return null;
    }
 
    public String getSuccessor() {
-
+    System.out.println("I made it!");
     XmlRpcClient succClient = new XmlRpcClient();
     XmlRpcClientConfigImpl configSucc = new XmlRpcClientConfigImpl();
     configSucc.setEnabledForExtensions(true);
@@ -125,7 +128,7 @@ return null;
   private static boolean initializeNetwork(){
      //Load successor and colony table with own IP addr
      
-     String IP = getPublicIP();
+     String IP = getPrivateIP();
      successor = IP;
      System.out.println(IP);
      for(int i = 0; i <  colonyTable.length; i++){
@@ -163,7 +166,25 @@ return null;
 	return null;
      }
 }
-  
+  public static String getPrivateIP() {
+        try {
+            Enumeration<NetworkInterface> networkInterfaces = NetworkInterface.getNetworkInterfaces();
+            while (networkInterfaces.hasMoreElements()) {
+                NetworkInterface ni = networkInterfaces.nextElement();
+                Enumeration<InetAddress> inetAddresses = ni.getInetAddresses();
+                while (inetAddresses.hasMoreElements()) {
+                    InetAddress ia = inetAddresses.nextElement();
+                    if (!ia.isLoopbackAddress() && ia.isSiteLocalAddress()) {
+                        return ia.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception e) {
+            System.err.println("Error getting private IP: " + e.getMessage());
+        }
+        return null;
+    }
+
   
 
   private static boolean joinNetwork(String bootstrap_IP){
